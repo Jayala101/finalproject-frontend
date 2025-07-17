@@ -1,70 +1,101 @@
-// context/AuthContext.tsx
-import axios from "axios";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-
-interface User {
-  username: string;
-  email: string;
-}
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import authService from '../services/authService';
+import type { User, LoginCredentials, RegisterData } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (data: User) => void;
+  loading: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
   logout: () => void;
-  fetchUser: () => void;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    const savedToken = localStorage.getItem("token");
-    if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser));
-      setToken(savedToken);
-    }
+    const initAuth = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          const userData = await authService.getProfile();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to initialize auth:', error);
+        localStorage.removeItem('authToken');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  const login = (data: User): void => {
-    localStorage.setItem("user", JSON.stringify(data));
-    localStorage.setItem("token", data.email); // Assuming email is the token for demo purposes
-    setUser(data);
-    setToken(data.email); // Storing the email as token
-  };
-
-  const logout = (): void => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    setToken(null);
-  };
-
-  const fetchUser = async (): Promise<void> => {
+  const login = async (credentials: LoginCredentials) => {
     try {
-      const response = await axios.get("https://nestjs-blog-backend-api.desarrollo-software.xyz/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(response.data.user);
+      setLoading(true);
+      const response = await authService.login(credentials);
+      setUser(response.user);
+      localStorage.setItem('authToken', response.access_token);
     } catch (error) {
-      console.error("Failed to fetch user", error);
-      logout(); // If fetching user fails, log them out
+      throw error;
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const register = async (data: RegisterData) => {
+    try {
+      setLoading(true);
+      const response = await authService.register(data);
+      setUser(response.user);
+      localStorage.setItem('authToken', response.access_token);
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('authToken');
+    setUser(null);
+  };
+
+  const value: AuthContextType = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === 'admin'
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, fetchUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth debe usarse dentro de AuthProvider");
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
-}
+};
+
+export default AuthContext;

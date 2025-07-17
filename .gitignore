@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +28,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Project specific - disabled components
+temp_disabled/
+
+# Build and cache files
+.cache/
+.parcel-cache/
+.tsbuildinfo

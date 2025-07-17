@@ -1,0 +1,10 @@
+Contact: mailto:security@blogapp.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, es
+Canonical: https://blogapp.com/.well-known/security.txt
+Policy: https://blogapp.com/security-policy
+Acknowledgments: https://blogapp.com/security-acknowledgments
+
+# Blog App Security Contact
+# Please report security vulnerabilities responsibly
+# We appreciate your help in keeping our users safe

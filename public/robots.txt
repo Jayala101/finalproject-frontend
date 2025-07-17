@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: /sitemap.xml
+
+# Performance optimization
+User-agent: *
+Crawl-delay: 1
+
+# Block access to sensitive files
+Disallow: /api/
+Disallow: /.env
+Disallow: /config/
+Disallow: /src/
