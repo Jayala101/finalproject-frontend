@@ -20,6 +20,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { API_CONFIG } from '../../config/api';
+import { processProductsImages } from '../../utils/imageProcessor';
 import type { Product } from '../../types';
 
 // Fallback products in case API fails
@@ -83,7 +84,9 @@ const ProductCatalogSimple: React.FC = () => {
       
       // Check if the response has valid data
       if (response && response.data && Array.isArray(response.data)) {
-        setProducts(response.data);
+        // Process all product images to ensure URLs are absolute
+        const processedProducts = processProductsImages(response.data);
+        setProducts(processedProducts);
       } else {
         // If response doesn't have expected data structure, throw an error
         throw new Error('Invalid response format from API');
@@ -162,7 +165,7 @@ const ProductCatalogSimple: React.FC = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={product.images?.[0]?.url || '/images/product-fallback-generic.jpg'}
+                image={product.images?.[0]?.processedUrl || product.images?.[0]?.url || '/images/product-fallback-generic.jpg'}
                 alt={product.name || 'Product image'}
                 onError={(e) => {
                   // If image fails to load, use a local fallback

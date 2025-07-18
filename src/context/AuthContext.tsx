@@ -11,6 +11,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  adminLogin: () => boolean; // New admin login function
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,6 +73,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('authToken');
     setUser(null);
   };
+  
+  // Admin login using predefined token
+  const adminLogin = () => {
+    try {
+      const result = authService.adminLogin();
+      if (result) {
+        setUser(result.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Admin login failed:', error);
+      return false;
+    }
+  };
 
   const value: AuthContextType = {
     user,
@@ -79,6 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    adminLogin,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin'
   };

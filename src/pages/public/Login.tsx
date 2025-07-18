@@ -1,6 +1,7 @@
 import { useState, type JSX } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authService from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { 
   Box, 
   TextField, 
@@ -34,6 +35,7 @@ export default function Login(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
+  const { adminLogin } = useAuth();
 
   const clearError = () => setError("");
   
@@ -88,6 +90,18 @@ export default function Login(): JSX.Element {
   const handleGitHubLogin = () => {
     // TODO: Implement GitHub OAuth
     console.log("GitHub login not implemented yet");
+  };
+  
+  const handleAdminLogin = () => {
+    setIsLoading(true);
+    const success = adminLogin();
+    
+    if (success) {
+      navigate('/admin');
+    } else {
+      setError("Admin login failed. The token may be expired.");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -287,6 +301,25 @@ export default function Login(): JSX.Element {
                 GitHub
               </Button>
             </Stack>
+            
+            {/* Admin Login Button */}
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={handleAdminLogin}
+              sx={{
+                mt: 3,
+                py: 1.5,
+                borderRadius: 2,
+                background: 'linear-gradient(45deg, #6b46c1, #4f46e5)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #5a3aa8, #4338ca)',
+                },
+              }}
+            >
+              Admin Access
+            </Button>
 
             {/* Register Link */}
             <Box sx={{ textAlign: 'center', mt: 3 }}>

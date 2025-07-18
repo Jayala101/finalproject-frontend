@@ -1,10 +1,11 @@
 // User and Authentication Types
 export interface User {
-  id: number;
+  id: string | number;
   email: string;
-  name: string;
+  name?: string;
+  username?: string; // Added for JWT token compatibility
   profilePicture?: string;
-  role: 'customer' | 'admin';
+  role?: 'customer' | 'admin';
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +83,7 @@ export interface ProductDocument {
 export interface ProductImage {
   id: number;
   url: string;
+  processedUrl?: string; // Added for processed absolute URLs
   altText?: string;
   isPrimary: boolean;
 }

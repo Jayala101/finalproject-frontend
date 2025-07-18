@@ -3,6 +3,7 @@ import { appRoutes } from "./routes";
 import type { JSX } from "react";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
+import { AuthProvider } from './context/AuthContext';
 
 // Create a modern Material UI theme
 const theme = createTheme({
@@ -138,11 +139,13 @@ export default function App(): JSX.Element {
   const routes = useRoutes(appRoutes);
   
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-        {routes}
-      </Box>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+          {routes}
+        </Box>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
